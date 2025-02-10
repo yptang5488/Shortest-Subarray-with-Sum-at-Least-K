@@ -39,18 +39,18 @@ struct FindResult {
     
     explicit FindResult(coroutine_handle<promise_type> h) : handle(h) {}
     
-    // 禁用拷貝構造和拷貝賦值
+    // Disable copy construction and copy value
     FindResult(const FindResult&) = delete;
     FindResult& operator=(const FindResult&) = delete;
 
-    // 支援移動構造和移動賦值
+    // Support for move construction and move value
     FindResult(FindResult&& other) noexcept : handle(other.handle) {
-        other.handle = nullptr;  // 移動後，保證其他不再使用
+        other.handle = nullptr;  // no longer use
     }
 
     FindResult& operator=(FindResult&& other) noexcept {
         if (this != &other) {
-            if (handle) handle.destroy();  // 釋放舊的資源
+            if (handle) handle.destroy();  // release resourses
             handle = other.handle;
             other.handle = nullptr;
         }
@@ -66,7 +66,7 @@ struct FindResult {
         handle.resume();
         if (handle.promise().current_value) {
             out = *handle.promise().current_value;
-            handle.promise().current_value = nullopt;  // 清空 current_value 防止重複
+            handle.promise().current_value = nullopt; // Clear current_value to prevent duplication
             return true;
         }
         return false;
@@ -110,18 +110,18 @@ struct FindLength {
     
     explicit FindLength(coroutine_handle<promise_type> h) : handle(h) {}
     
-    // 禁用拷貝構造和拷貝賦值
+    // Disable copy construction and copy value
     FindLength(const FindLength&) = delete;
     FindLength& operator=(const FindLength&) = delete;
 
-    // 支援移動構造和移動賦值
+    // Support for move construction and move value
     FindLength(FindLength&& other) noexcept : handle(other.handle) {
-        other.handle = nullptr;  // 移動後，保證其他不再使用
+        other.handle = nullptr;
     }
 
     FindLength& operator=(FindLength&& other) noexcept {
         if (this != &other) {
-            if (handle) handle.destroy();  // 釋放舊的資源
+            if (handle) handle.destroy();
             handle = other.handle;
             other.handle = nullptr;
         }
@@ -137,7 +137,7 @@ struct FindLength {
         handle.resume();
         if (handle.promise().current_value) {
             out = *handle.promise().current_value;
-            handle.promise().current_value = nullopt;  // 清空 current_value 防止重複
+            handle.promise().current_value = nullopt;  // Clear current_value to prevent duplication
             return true;
         }
         return false;
@@ -176,7 +176,7 @@ int findMinLength(const vector<long long>& prefixSum, int numCoroutines, int tar
     int len_range_l = 1, len_range_r = n;
 
     vector<unique_ptr<FindLength>> coroutines;
-    coroutines.reserve(numCoroutines);  // 確保 coroutines 大小一致
+    coroutines.reserve(numCoroutines);
 
     // binary search for minimize length
     while (len_range_l < len_range_r) {
@@ -193,7 +193,6 @@ int findMinLength(const vector<long long>& prefixSum, int numCoroutines, int tar
             int extra_tasks = (n - len + 1) % numCoroutines;
 
             int end = (i < extra_tasks) ? start + tasks_per_coroutine + 1 : start + tasks_per_coroutine;
-            // cout << n - len + 1 << ":[" << start << "," << end << ")" << endl;
             coroutines.emplace_back(make_unique<FindLength>(ifFoundCoroutine(prefixSum, start, end, len, target)));
             start = end;
         }
@@ -260,8 +259,6 @@ void findResults(const vector<long long>& prefixSum, int numCoroutines, int targ
     }
 }
 
-
-// 主程式
 int main(int argc, char* argv[]) {
     if (argc != 4) {
         cerr << "Usage: " << argv[0] << " <target sum> <input file> <numCoroutines>" << endl;
